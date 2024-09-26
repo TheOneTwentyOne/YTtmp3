@@ -1,0 +1,23 @@
+For playlist class:
+--flat-playlist
+--simulate
+
+
+
+
+For video class:
+--no-playlist
+--limit-rate 100G
+--paths {custom path variable}
+--windows-filenames
+--ffmpeg-location "lib\\"
+--write-thumbnail
+--convert-thumbnails jpg
+--extract-audio
+--audio-format mp3
+--audio-quality 10
+
+
+
+
+--no-playlist --limit-rate 100G --paths "\\test\\" --windows-filenames --ffmpeg-location "\\lib\\" --write-thumbnail --convert-thumbnails jpg --extract-audio --audio-format mp3 --audio-quality 0
