@@ -241,6 +241,7 @@ public class Song{
             "-vf",
             "crop='min(iw,ih):min(iw,ih)'",
             "\"" + this.imgFilenameDirectoryString + "\"",
+            
         };
 
         Process imgProcess = Runtime.getRuntime().exec(cArtStringArray);
