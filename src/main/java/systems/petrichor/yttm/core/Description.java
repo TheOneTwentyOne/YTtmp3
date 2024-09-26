@@ -1,67 +1,52 @@
-package systems.petrichor.yttm.core;
+package src.main.java.systems.petrichor.yttm.core;
+
+
 
 public class Description {
 
-    private String[] descriptionStringArray;
-    private String mainArtistString;
-    private String allArtistsString;
-    private String titleString;
-    private String yearString;
-    private String albumString;
-
-
-
-
+    private final String mainArtistString;
+    private final String allArtistsString;
+    private final String titleString;
+    private final String yearString;
+    private final String albumString;
 
 
     public Description(String descriptionString) {
         if (!descriptionString.startsWith("Provided to YouTube")) {
             throw new IllegalArgumentException("Description does not match required format. Offending URL has been tracked.");
-        } 
+        }
 
-        this.descriptionStringArray = descriptionString.split("\n");
+        String[] descriptionStringArray = descriptionString.split("\n");
+        String[] split = descriptionStringArray[2].split(" · ");
 
-        this.mainArtistString = extractMainArtist();
-        this.allArtistsString = extractAllArtists();
-        this.titleString = extractTitle();
-        this.yearString = extractYear();
-        this.albumString = extractAlbum();
+        this.mainArtistString = split[1].strip();
+        this.allArtistsString = extractAllArtists(descriptionStringArray);
+        this.titleString = split[0].strip();
+        this.yearString = extractYear(descriptionStringArray);
+        this.albumString = descriptionStringArray[4].strip();
     }
 
 
-
-
-
-
-    private String extractMainArtist() {
-        String infoString = this.descriptionStringArray[2];
-        return infoString.split(" · ")[1].strip();
-    }
-
-    private String extractAllArtists() {
-        String infoString = this.descriptionStringArray[2];
+    private String extractAllArtists(String[] descriptionStringArray) {
+        String infoString = descriptionStringArray[2];
         String[] infoStringArray = infoString.split(" · ");
-        
 
-        String concatenatedArtistsString = "";
+
+        StringBuilder concatenatedArtistsString = new StringBuilder();
         for (int i = 1; i < infoStringArray.length; i++) {
-            if (concatenatedArtistsString.indexOf(infoStringArray[i].strip())==-1) {
-                concatenatedArtistsString = concatenatedArtistsString.concat(infoStringArray[i].strip());
+            if (concatenatedArtistsString.indexOf(infoStringArray[i].strip()) == -1) {
+                concatenatedArtistsString.append(infoStringArray[i].strip());
             }
-            if (i!=infoStringArray.length-1) {
-                concatenatedArtistsString = concatenatedArtistsString.concat("‎,‎‎ ");
+            if (i != infoStringArray.length - 1) {
+                concatenatedArtistsString.append("‎,‎‎ ");
             }
         }
 
-        return concatenatedArtistsString;
+        return concatenatedArtistsString.toString();
     }
 
-    private String extractTitle() {
-        String infoString = this.descriptionStringArray[2];
-        return infoString.split(" · ")[0].strip();
-    }
 
-    private String extractYear() {
+    private String extractYear(String[] descriptionStringArray) {
         for (String line : descriptionStringArray) {
             if (line.startsWith("Released on: ")) {
                 return line.replaceAll("Released on: ", "").substring(0, 4);
@@ -70,15 +55,6 @@ public class Description {
 
         return null;
     }
-
-    private String extractAlbum() {
-        String infoString = this.descriptionStringArray[4];
-        return infoString.strip();
-    }
-
-
-
-
 
 
     public String getMainArtistString() {
