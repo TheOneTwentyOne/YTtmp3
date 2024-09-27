@@ -243,7 +243,7 @@ public class Song implements Runnable {
 //██████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████
 //██████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████
 
-public int applyCoverArt() throws IOException, InterruptedException {
+public int cropCoverArt() throws IOException, InterruptedException {
 
         for (String fileString : this.directoryFile.list()) {
             if (fileString.toLowerCase().endsWith(".jpg")) {
