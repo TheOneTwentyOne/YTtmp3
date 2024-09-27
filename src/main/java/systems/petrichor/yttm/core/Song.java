@@ -1,4 +1,4 @@
-package src.main.java.systems.petrichor.yttm.core;
+package systems.petrichor.yttm.core;
 
 import java.io.BufferedReader;
 import java.io.IOException;
