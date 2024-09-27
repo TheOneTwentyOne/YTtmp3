@@ -12,9 +12,15 @@ public class Description {
 
 
     public Description(String descriptionString) {
+
+        if (descriptionString == null) {
+            throw new IllegalArgumentException("Description cannot be equal to 'null'");
+        } 
+        
         if (!descriptionString.startsWith("Provided to YouTube")) {
             throw new IllegalArgumentException("Description does not match required format. Offending URL has been tracked.");
-        }
+        } 
+
 
         String[] descriptionStringArray = descriptionString.split("\n");
         String[] split = descriptionStringArray[2].split(" · ");

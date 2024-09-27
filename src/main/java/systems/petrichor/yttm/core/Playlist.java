@@ -1,4 +1,4 @@
-package src.main.java.systems.petrichor.yttm.core;
+package systems.petrichor.yttm.core;
 
 public class Playlist {
 
