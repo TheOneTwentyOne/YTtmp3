@@ -7,6 +7,7 @@ import java.io.InputStreamReader;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.Scanner;
@@ -170,49 +171,39 @@ public class Song implements Runnable {
 //██████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████
 //██████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████
 
-    public int applyMetadata() throws IOException, InterruptedException, IllegalArgumentException {
-            
-        Files.createDirectories(this.intermediatePath);
+public int applyMetadata() throws IOException, InterruptedException, IllegalArgumentException {
+    
+    // Ensure the intermediate directory is created
+    Files.createDirectories(this.intermediatePath);
 
-        String[] commandStringArray;
+    // Base command arguments
+    List<String> commandList = new ArrayList<>(Arrays.asList(
+        ".\\lib\\ffmpeg.exe",
+        "-nostdin",
+        "-i", ("\"" + this.mp3FilePath.toAbsolutePath().toString() + "\""),
+        "-metadata", "title=" + description.getTitleString(),
+        "-metadata", "artist=" + description.getAllArtistsString(),
+        "-metadata", "album_artist=" + description.getMainArtistString(),
+        "-metadata", "album=" + description.getAlbumString(),
+        "-id3v2_version", "3",
+        "-write_id3v1", "1",
+        "-y",
+        "-c", "copy",
+        ("\"" + this.intermediatePath.toAbsolutePath().toString() + "\\" + this.mp3FilePath.getFileName().toString() + "\"")
+    ));
 
-        if (this.description.getYearString() == null) {
-            commandStringArray = new String[] {
-                ".\\lib\\ffmpeg.exe",
-                "-nostdin",
-                "-i",
-                ("\"" + this.mp3FilePath.toAbsolutePath().toString() + "\""),
-                "-metadata", ("title=" + description.getTitleString()),
-                "-metadata", ("artist=" + description.getAllArtistsString()),
-                "-metadata", ("album_artist=" + description.getMainArtistString()),
-                "-metadata", ("album=" + description.getAlbumString()),
-                "-id3v2_version", "3",
-                "-write_id3v1", "1",
-                "-y",
-                "-c", "copy",
-                ("\"" + this.intermediatePath.toAbsolutePath().toString() + "\\" + this.mp3FilePath.getFileName().toString() + "\""),
-            };
-        } else {
-            commandStringArray = new String[] {
-                ".\\lib\\ffmpeg.exe",
-                "-nostdin",
-                "-i",
-                ("\"" + this.mp3FilePath.toAbsolutePath().toString() + "\""),
-                "-metadata", ("title=" + description.getTitleString()),
-                "-metadata", ("artist=" + description.getAllArtistsString()),
-                "-metadata", ("album_artist=" + description.getMainArtistString()),
-                "-metadata", ("album=" + description.getAlbumString()),
-                "-metadata", ("date=" + description.getYearString()),
-                "-id3v2_version", "3",
-                "-write_id3v1", "1",
-                "-y",
-                "-c", "copy",
-                ("\"" + this.intermediatePath.toAbsolutePath().toString() + "\\" + this.mp3FilePath.getFileName().toString() + "\""),
-            };
-        }
-
-        return startProcess(commandStringArray);
+    // Add year metadata only if it's available
+    if (this.description.getYearString() != null) {
+        commandList.add(8, "-metadata");
+        commandList.add(9, "date=" + description.getYearString());
     }
+
+    // Convert the list back to an array
+    String[] commandStringArray = commandList.toArray(new String[0]);
+
+    return startProcess(commandStringArray);
+}
+
 
 //██████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████
 //██████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████
@@ -222,13 +213,11 @@ public class Song implements Runnable {
         String[] coverArtStringArray = {
             ".\\lib\\ffmpeg.exe",
             "-nostdin",
-            "-i",
-            ("\"" + this.imgFilePath.toAbsolutePath().toString() + "\""),
+            "-i", ("\"" + this.imgFilePath.toAbsolutePath().toString() + "\""),
             "-y",
             "-vf",
             "crop='min(iw,ih):min(iw,ih)'",
-            "-update",
-            "1",
+            "-update", "1",
             ("\"" + this.imgFilePath.toAbsolutePath().toString() + "\""),
         };
 
@@ -245,17 +234,12 @@ public class Song implements Runnable {
         String[] coverArtStringArray = {
             ".\\lib\\ffmpeg.exe",
             "-nostdin",
-            "-i",
-            ("\"" + this.intermediatePath.toAbsolutePath().toString() + "\\" + this.mp3FilePath.getFileName().toString() + "\""),
-            "-i",
-            ("\"" + this.imgFilePath.toAbsolutePath().toString() + "\""),
+            "-i", ("\"" + this.intermediatePath.toAbsolutePath().toString() + "\\" + this.mp3FilePath.getFileName().toString() + "\""),
+            "-i", ("\"" + this.imgFilePath.toAbsolutePath().toString() + "\""),
             "-y",
-            "-map", 
-            "0",
-            "-map",
-            "1:0",
-            "-codec",
-            "copy",
+            "-map", "0",
+            "-map", "1:0",
+            "-codec", "copy",
             ("\"" 
                 + this.finishedPath.toAbsolutePath().toString() 
                 + "\\" 
