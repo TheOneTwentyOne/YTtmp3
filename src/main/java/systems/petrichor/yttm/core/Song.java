@@ -4,14 +4,10 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Objects;
-import java.util.Scanner;
-
 
 import java.nio.file.*;
 
@@ -29,20 +25,13 @@ public class Song implements Runnable {
     private Description description;
 
     private Path dirPath = null;
-    private Path parentDirPath = null;
     private Path intermediatePath = null;
     private Path finishedPath = null;
     private Path imgFilePath = null;
     private Path mp3FilePath = null;
     private Path descriptionFilePath = null;
 
-
     private String urlString;
-    private String formattedDirectoryString;
-    private String mp3FilenameString = null;
-    private String mp3FilenameDirectoryString = null;
-    private String imgFilenameString = null;
-    private String imgFilenameDirectoryString = null;
 
     public boolean failed = false;
 
@@ -70,18 +59,7 @@ public class Song implements Runnable {
         this.intermediatePath = Paths.get(dirPath.toAbsolutePath().toString() + "\\intermediate");
         this.finishedPath = Paths.get(dirPath.toAbsolutePath().toString() + "\\finished");
 
-        try {
-            downloadFiles();
-            findFiles();
-            initializeDescription();
-            applyMetadata();
-            cropCoverArt();
-            applyCoverArt();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        throw new IllegalArgumentException("HALTED.");
+        //throw new IllegalArgumentException("HALTED.");
     }
 
     /*
@@ -136,15 +114,10 @@ public class Song implements Runnable {
             } else if (path.toAbsolutePath().toString().toLowerCase().endsWith(".jpg")) {
                 this.imgFilePath = path.toAbsolutePath();
             }
-
-            if (mp3FilePath == null || descriptionFilePath == null || imgFilePath == null) {
-                try {
-                    throw new FileNotFoundException("Required file(s) not found.");
-                } catch (FileNotFoundException e) {
-                    e.printStackTrace();
-                }
-            }
         });
+        if (mp3FilePath == null || descriptionFilePath == null || imgFilePath == null) {
+            new FileNotFoundException("Required file(s) not found.").printStackTrace();
+        }
     }
 
 //██████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████
@@ -243,15 +216,27 @@ public int applyMetadata() throws IOException, InterruptedException, IllegalArgu
             ("\"" 
                 + this.finishedPath.toAbsolutePath().toString() 
                 + "\\" 
-                + this.description.getMainArtistString() 
+                + sanitizeFilename(this.description.getMainArtistString())
                 + " - "
-                + this.description.getTitleString()
+                + sanitizeFilename(this.description.getTitleString())
                 + ".mp3" 
                 + "\""
             ),
         };
 
         return startProcess(coverArtStringArray);
+    }
+    
+//██████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████
+//██████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████
+
+    public void moveFile() throws IOException {
+
+        String filenameString = ("\\" + sanitizeFilename(this.description.getMainArtistString()) + " - " + sanitizeFilename(this.description.getTitleString()) + ".mp3");
+        Path inputPath = Paths.get(this.finishedPath.toAbsolutePath().toString() + filenameString);
+        Path outputPath = Paths.get(this.dirPath.getParent().toAbsolutePath().toString() + filenameString);
+
+        Files.move(inputPath, outputPath, StandardCopyOption.ATOMIC_MOVE, StandardCopyOption.REPLACE_EXISTING);
     }
 
     /*
@@ -343,10 +328,18 @@ public int applyMetadata() throws IOException, InterruptedException, IllegalArgu
         try {
             downloadFiles();
             findFiles();
+            initializeDescription();
             applyMetadata();
-        } catch (Exception e) {
-            System.out.println("OH NO");
-            System.out.println(e.getStackTrace());
+            cropCoverArt();
+            applyCoverArt();
+            moveFile();
+        } catch (IOException e) {
+            System.out.println("IO exception occured.");
+            e.printStackTrace();
+        } catch (InterruptedException e) {
+            System.out.println("Process was interrupted.");
+            e.printStackTrace();
         }
     }
+
 }
