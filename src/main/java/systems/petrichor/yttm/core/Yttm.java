@@ -19,6 +19,11 @@ public class Yttm {
         urls.add("https://music.youtube.com/watch?v=sqYbcSJ-fQI&si=xxaPYrX07oRCAgxc");
         urls.add("https://music.youtube.com/watch?v=sqYbcSJ-fQI&si=xxaPYrX07oRCAgxc");
 
+        ArrayList<String> songUrlArrayList = new Playlist("https://music.youtube.com/playlist?list=PLLtfsNRMIOUd44d4IT870Qef71f3rckP9&si=-fR0Y-CPvTLuRh0M").getUrls();
+        for (String SongUrlString : songUrlArrayList) {
+            urls.add(SongUrlString);
+        }
+
         // Create an array list of songs
         ArrayList<Song> songs = IntStream.range(0, urls.size())
                 .mapToObj(i -> new Song(urls.get(i), "subdir_" + i + "\\"))

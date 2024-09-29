@@ -10,6 +10,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import java.nio.file.*;
+import java.nio.file.attribute.BasicFileAttributes;
 
 public class Song implements Runnable {
 
@@ -245,7 +246,25 @@ public int applyMetadata() throws IOException, InterruptedException, IllegalArgu
 //██████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████
 //██████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████
 
-    public void purgeDirectory
+    public void purgeDir() throws IOException {
+
+        Files.walkFileTree(dirPath, new SimpleFileVisitor<Path>() {
+            @Override
+            public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+                Files.delete(file);
+                return FileVisitResult.CONTINUE;
+            }
+
+            @Override
+            public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
+                if (!dir.equals(dirPath)) {
+                    Files.delete(dir);
+                }
+                return FileVisitResult.CONTINUE;
+            }
+        });
+
+    }
 
     /*
     ██╗  ██╗███████╗██╗     ██████╗ ███████╗██████╗              
@@ -341,6 +360,7 @@ public int applyMetadata() throws IOException, InterruptedException, IllegalArgu
             cropCoverArt();
             applyCoverArt();
             moveFile();
+            purgeDir();
         } catch (IOException e) {
             System.out.println("IO exception occured.");
             e.printStackTrace();
