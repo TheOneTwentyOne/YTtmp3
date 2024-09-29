@@ -1,4 +1,4 @@
-package systems.petrichor.yttm.core;
+package src.main.java.systems.petrichor.yttm.core;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -145,9 +145,11 @@ public class Song implements Runnable {
 //██████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████
 
 public int applyMetadata() throws IOException, InterruptedException, IllegalArgumentException {
-    
+
     // Ensure the intermediate directory is created
-    Files.createDirectories(this.intermediatePath);
+    if (!Files.exists(this.intermediatePath)) {
+        Files.createDirectories(this.intermediatePath);
+    }
 
     // Base command arguments
     List<String> commandList = new ArrayList<>(Arrays.asList(
@@ -201,8 +203,9 @@ public int applyMetadata() throws IOException, InterruptedException, IllegalArgu
 //██████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████
 
     public int applyCoverArt() throws IOException, InterruptedException {
-
-        Files.createDirectories(this.finishedPath);
+        if (!Files.exists(this.finishedPath)) {
+            Files.createDirectories(this.finishedPath);
+        }
 
         String[] coverArtStringArray = {
             ".\\lib\\ffmpeg.exe",
@@ -213,28 +216,28 @@ public int applyMetadata() throws IOException, InterruptedException, IllegalArgu
             "-map", "0",
             "-map", "1:0",
             "-codec", "copy",
-            ("\"" 
-                + this.finishedPath.toAbsolutePath().toString() 
-                + "\\" 
+            ("\""
+                + this.finishedPath.toAbsolutePath().toString()
+                + "\\"
                 + sanitizeFilename(this.description.getMainArtistString())
                 + " - "
                 + sanitizeFilename(this.description.getTitleString())
-                + ".mp3" 
+                + ".mp3"
                 + "\""
             ),
         };
 
         return startProcess(coverArtStringArray);
     }
-    
+
 //██████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████
 //██████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████
 
     public void moveFile() throws IOException {
 
         String filenameString = ("\\" + sanitizeFilename(this.description.getMainArtistString()) + " - " + sanitizeFilename(this.description.getTitleString()) + ".mp3");
-        Path inputPath = Paths.get(this.finishedPath.toAbsolutePath().toString() + filenameString);
-        Path outputPath = Paths.get(this.dirPath.getParent().toAbsolutePath().toString() + filenameString);
+        Path inputPath = Paths.get(this.finishedPath.toAbsolutePath() + filenameString);
+        Path outputPath = Paths.get(this.dirPath.toAbsolutePath().getParent().toAbsolutePath() + filenameString);
 
         Files.move(inputPath, outputPath, StandardCopyOption.ATOMIC_MOVE, StandardCopyOption.REPLACE_EXISTING);
     }

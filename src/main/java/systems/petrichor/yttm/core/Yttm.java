@@ -1,86 +1,43 @@
-package systems.petrichor.yttm.core;
+package src.main.java.systems.petrichor.yttm.core;
 
 import java.util.ArrayList;
-import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.LinkedBlockingQueue;
-
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 public class Yttm {
 
-
-
-
-
-
-        static class SongWorker implements Runnable {
-        private BlockingQueue<String> urlQueue;  // Queue of URLs
-        private String path;                     // Unique path for this thread
-
-        public SongWorker(BlockingQueue<String> urlQueue, String path) {
-            this.urlQueue = urlQueue;
-            this.path = path;
-        }
-
-        @Override
-        public void run() {
-            try {
-                // Continuously process URLs from the queue
-                while (true) {
-                    String url = urlQueue.take();  // Take a URL from the queue (blocking call)
-                    if (url.equals("POISON_PILL")) {
-                        break;  // Stop thread when poison pill is received
-                    }
-                    // Create and process Song object
-                    Song song = new Song(url, path);
-                    song.run();
-                }
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();  // Restore interrupted state
-            }
-        }
-    }
-
     public static void main(String[] args) throws Exception {
         final int noOfThreads = 32;
-        BlockingQueue<String> urlQueue = new LinkedBlockingQueue<>();
+
+        // Make an array list of URLs
+        ArrayList<String> urls = new ArrayList<>();
 
         // Adding some URLs to the queue (you can add as many as needed)
-        urlQueue.add("https://music.youtube.com/watch?v=sqYbcSJ-fQI&si=xxaPYrX07oRCAgxc");
-        urlQueue.add("https://music.youtube.com/watch?v=example2");
-        urlQueue.add("https://music.youtube.com/watch?v=example3");
-        // Add more URLs as needed...
+        urls.add("https://music.youtube.com/watch?v=sqYbcSJ-fQI&si=xxaPYrX07oRCAgxc");
+        urls.add("https://music.youtube.com/watch?v=sqYbcSJ-fQI&si=xxaPYrX07oRCAgxc");
+        urls.add("https://music.youtube.com/watch?v=sqYbcSJ-fQI&si=xxaPYrX07oRCAgxc");
 
-        // Poison pills to stop the threads when work is done
-        for (int i = 0; i < noOfThreads; i++) {
-            urlQueue.add("POISON_PILL");
+        // Create an array list of songs
+        ArrayList<Song> songs = IntStream.range(0, urls.size())
+                .mapToObj(i -> new Song(urls.get(i), "subdir_" + i + "\\"))
+                .collect(Collectors.toCollection(ArrayList::new));
+
+        // Set the number of platform threads available for scheduling virtual threads
+        // System.setProperty("jdk.virtualThreadScheduler.parallelism", "4"); // Keep this the default
+
+
+        if (noOfThreads > 0) {
+            // Set the number of platform threads available for scheduling virtual threads
+            System.setProperty("jdk.virtualThreadScheduler.parallelism", Integer.toString(noOfThreads));
+        } // else keep the default value (Very big number)
+
+        try (ExecutorService pool = Executors.newVirtualThreadPerTaskExecutor()) {
+            // Submit tasks to the pool
+            songs.forEach(pool::execute);
+
+            pool.shutdown();  // Shutdown the pool after tasks are submitted
         }
-
-        // Initialize a thread pool
-        ExecutorService pool = Executors.newFixedThreadPool(noOfThreads);
-
-        // Assign each thread a unique path (subdirectory)
-        for (int i = 0; i < noOfThreads; i++) {
-            String path = "subdir_" + i + "\\";  // Unique path for each thread
-            pool.execute(new SongWorker(urlQueue, path));
-        }
-
-        pool.shutdown();  // Shutdown the pool after tasks are submitted
     }
-
-
-
-
-    //public static void main(String[] args) throws Exception {
-
-    //    Song test = new Song("https://music.youtube.com/watch?v=sqYbcSJ-fQI&si=xxaPYrX07oRCAgxc", "test\\");
-
-    //    ArrayList<Song> downlode = new ArrayList<>();
-    //    downlode.add(test);
-    //    final int noOfThreads = 16;
-    //    try (ExecutorService pool = Executors.newFixedThreadPool(noOfThreads)) {
-    //        downlode.forEach(pool::execute);
-    //    }
-    //}
 }
