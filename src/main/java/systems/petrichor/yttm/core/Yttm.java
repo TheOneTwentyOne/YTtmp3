@@ -9,21 +9,22 @@ import java.util.stream.IntStream;
 public class Yttm {
 
     public static void main(String[] args) throws Exception {
-        final int noOfThreads = 32;
+        final int noOfThreads = 8;
 
         // Make an array list of URLs
         ArrayList<String> urls = new ArrayList<>();
 
         // Adding some URLs to the queue (you can add as many as needed)
-        urls.add("https://music.youtube.com/watch?v=sqYbcSJ-fQI&si=xxaPYrX07oRCAgxc");
-        urls.add("https://music.youtube.com/watch?v=sqYbcSJ-fQI&si=xxaPYrX07oRCAgxc");
-        urls.add("https://music.youtube.com/watch?v=sqYbcSJ-fQI&si=xxaPYrX07oRCAgxc");
+        //urls.add("https://music.youtube.com/watch?v=sqYbcSJ-fQI&si=xxaPYrX07oRCAgxc");
+        //urls.add("https://music.youtube.com/watch?v=sqYbcSJ-fQI&si=xxaPYrX07oRCAgxc");
+        //urls.add("https://music.youtube.com/watch?v=sqYbcSJ-fQI&si=xxaPYrX07oRCAgxc");
 
         ArrayList<String> songUrlArrayList = new Playlist("https://music.youtube.com/playlist?list=PLLtfsNRMIOUd44d4IT870Qef71f3rckP9&si=-fR0Y-CPvTLuRh0M").getUrls();
         for (String SongUrlString : songUrlArrayList) {
             urls.add(SongUrlString);
         }
 
+        System.out.println("Fetched URLs\n");
         // Create an array list of songs
         ArrayList<Song> songs = IntStream.range(0, urls.size())
                 .mapToObj(i -> new Song(urls.get(i), "subdir_" + i + "\\"))
