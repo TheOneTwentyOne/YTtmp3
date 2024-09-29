@@ -1,4 +1,4 @@
-package src.main.java.systems.petrichor.yttm.core;
+package systems.petrichor.yttm.core;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -241,6 +241,11 @@ public int applyMetadata() throws IOException, InterruptedException, IllegalArgu
 
         Files.move(inputPath, outputPath, StandardCopyOption.ATOMIC_MOVE, StandardCopyOption.REPLACE_EXISTING);
     }
+
+//██████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████
+//██████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████
+
+    public void purgeDirectory
 
     /*
     ██╗  ██╗███████╗██╗     ██████╗ ███████╗██████╗              
