@@ -86,6 +86,7 @@ public class Song implements Runnable {
         String[] commandStringArray = {
             ".\\lib\\yt-dlp.exe",
             "--no-playlist",
+            "--quiet",
             "--write-description",
             "--limit-rate", "100G",
             "--windows-filenames",
@@ -115,7 +116,9 @@ public class Song implements Runnable {
             } else if (path.toAbsolutePath().toString().toLowerCase().endsWith(".jpg")) {
                 this.imgFilePath = path.toAbsolutePath();
             }
+
         });
+        
         if (mp3FilePath == null || descriptionFilePath == null || imgFilePath == null) {
             new FileNotFoundException("Required file(s) not found.").printStackTrace();
         }
@@ -148,13 +151,14 @@ public class Song implements Runnable {
 public int applyMetadata() throws IOException, InterruptedException, IllegalArgumentException {
 
     // Ensure the intermediate directory is created
-    if (!Files.exists(this.intermediatePath)) {
+    if (Files.notExists(this.intermediatePath)) {
         Files.createDirectories(this.intermediatePath);
     }
 
     // Base command arguments
     List<String> commandList = new ArrayList<>(Arrays.asList(
         ".\\lib\\ffmpeg.exe",
+        "-loglevel", "quiet",
         "-nostdin",
         "-i", ("\"" + this.mp3FilePath.toAbsolutePath().toString() + "\""),
         "-metadata", "title=" + description.getTitleString(),
@@ -188,6 +192,7 @@ public int applyMetadata() throws IOException, InterruptedException, IllegalArgu
 
         String[] coverArtStringArray = {
             ".\\lib\\ffmpeg.exe",
+            "-loglevel", "quiet",
             "-nostdin",
             "-i", ("\"" + this.imgFilePath.toAbsolutePath().toString() + "\""),
             "-y",
@@ -210,6 +215,7 @@ public int applyMetadata() throws IOException, InterruptedException, IllegalArgu
 
         String[] coverArtStringArray = {
             ".\\lib\\ffmpeg.exe",
+            "-loglevel", "quiet",
             "-nostdin",
             "-i", ("\"" + this.intermediatePath.toAbsolutePath().toString() + "\\" + this.mp3FilePath.getFileName().toString() + "\""),
             "-i", ("\"" + this.imgFilePath.toAbsolutePath().toString() + "\""),
@@ -236,12 +242,25 @@ public int applyMetadata() throws IOException, InterruptedException, IllegalArgu
 
     public void moveFile() throws IOException {
 
-        String filenameString = ("\\" + sanitizeFilename(this.description.getMainArtistString()) + " - " + sanitizeFilename(this.description.getTitleString()) + ".mp3");
-        Path inputPath = Paths.get(this.finishedPath.toAbsolutePath() + filenameString);
-        Path outputPath = Paths.get(this.dirPath.toAbsolutePath().getParent().toAbsolutePath() + filenameString);
+        final Path[] toBeThrownMp3Path = new Path[1];
 
-        Files.move(inputPath, outputPath, StandardCopyOption.ATOMIC_MOVE, StandardCopyOption.REPLACE_EXISTING);
+        Files.list(this.finishedPath.toAbsolutePath()).forEach(path -> {
+            if (path.toAbsolutePath().toString().toLowerCase().endsWith(".mp3")) {
+                toBeThrownMp3Path[0] = path.toAbsolutePath();  
+            }
+        });
+
+        if (toBeThrownMp3Path[0] != null) { 
+            Files.move(toBeThrownMp3Path[0], 
+                Paths.get(this.dirPath.toAbsolutePath().getParent().toString() + "\\" + toBeThrownMp3Path[0].getFileName().toString()), 
+                StandardCopyOption.ATOMIC_MOVE, 
+                StandardCopyOption.REPLACE_EXISTING
+            );
+        } else {
+            System.err.println("No .mp3 file found to move.");
+        }
     }
+
 
 //██████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████
 //██████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████
