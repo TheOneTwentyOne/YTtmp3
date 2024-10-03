@@ -56,7 +56,6 @@ public class Yttm {
         pool.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
 
         for (Path pathFromArray : threadFolders) {
-            System.out.println(pathFromArray.toAbsolutePath().toString());
             Files.deleteIfExists(pathFromArray.toAbsolutePath());
         }
     }
