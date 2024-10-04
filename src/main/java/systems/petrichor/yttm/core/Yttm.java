@@ -14,7 +14,7 @@ public class Yttm {
 
         String chosenPathString = "C:\\Users\\ephem\\Desktop\\SONGSTESTER\\";
         
-        final int noOfThreads = 32;  
+        final int noOfThreads = 64;  
 
         ArrayList<String> urls = new ArrayList<>();
 
