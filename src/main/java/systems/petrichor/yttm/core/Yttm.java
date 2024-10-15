@@ -12,14 +12,13 @@ public class Yttm {
 
     public static void main(String[] args) throws Exception {
 
-        String chosenPathString = "C:\\Users\\ephem\\Desktop\\SONGSTESTER\\";
+        String chosenPathString = "C:\\Users\\ephem\\Desktop\\SONGSTESTER2\\";
         
         final int noOfThreads = 64;  
 
         ArrayList<String> urls = new ArrayList<>();
 
-        ArrayList<String> songUrlArrayList = new Playlist("https://music.youtube.com/playlist?list=PLLtfsNRMIOUd44d4IT870Qef71f3rckP9&si=-fR0Y-CPvTLuRh0M").getUrls();
-        urls.addAll(songUrlArrayList);
+        urls.addAll(new Playlist("https://music.youtube.com/playlist?list=PLLtfsNRMIOUd44d4IT870Qef71f3rckP9&si=-fR0Y-CPvTLuRh0M").getUrls());
 
         Queue<String> urlQueue = new ConcurrentLinkedQueue<>(urls);
         
@@ -49,8 +48,6 @@ public class Yttm {
                 }
             });
         }
-
-
 
         pool.shutdown();
         pool.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);

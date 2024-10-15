@@ -208,6 +208,26 @@ public int applyMetadata() throws IOException, InterruptedException, IllegalArgu
 //██████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████
 //██████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████
 
+    public int resizeCoverArt() throws IOException, InterruptedException {
+
+        String[] coverArtStringArray = {
+            ".\\lib\\ffmpeg.exe",
+            "-loglevel", "quiet",
+            "-nostdin",
+            "-i", ("\"" + this.imgFilePath.toAbsolutePath().toString() + "\""),
+            "-y",
+            "-vf",
+            "scale='500:-1'",
+            "-update", "1",
+            ("\"" + this.imgFilePath.toAbsolutePath().toString() + "\""),
+        };
+
+        return startProcess(coverArtStringArray);
+    }
+
+//██████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████
+//██████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████
+
     public int applyCoverArt() throws IOException, InterruptedException {
         if (!Files.exists(this.finishedPath)) {
             Files.createDirectories(this.finishedPath);
@@ -379,6 +399,7 @@ public int applyMetadata() throws IOException, InterruptedException, IllegalArgu
                 if (!this.failed) {
                     applyMetadata();
                     cropCoverArt();
+                    resizeCoverArt();
                     applyCoverArt();
                     moveFile();
                 }
